@@ -1,0 +1,5 @@
+{
+  "name": "DeFi Mastery Quiz",
+  "description": "An interactive assessment platform to test your knowledge on DeFi protocols like Morpho, AAVE, and Sablier. Unlock secret words by scoring at least 60%.",
+  "requestFramePermissions": []
+}

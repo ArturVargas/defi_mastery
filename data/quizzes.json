@@ -1,0 +1,117 @@
+
+[
+  {
+    "id": "morpho",
+    "title": "Morpho Protocol",
+    "description": "Master the efficiency of peer-to-peer matching and the trustless nature of Morpho Blue.",
+    "secretWord": "EFFICIENT_LIQUIDITY_88",
+    "questions": [
+      {
+        "id": "m1",
+        "text": "What is the core architectural innovation of Morpho Blue?",
+        "options": ["A monolithic pool for all assets", "A trustless, immutable, and permissionless lending primitive", "A centralized risk management engine", "A cross-chain bridge for NFTs"],
+        "correctAnswerIndex": 1
+      },
+      {
+        "id": "m2",
+        "text": "How does Morpho Optimizer improve rates for users?",
+        "options": ["By charging higher fees to lenders", "By matching lenders and borrowers peer-to-peer on top of underlying pools", "By minting synthetic assets", "By liquidating undercollateralized positions faster"],
+        "correctAnswerIndex": 1
+      },
+      {
+        "id": "m3",
+        "text": "In the context of MetaMorpho, what is a 'Curator'?",
+        "options": ["An entity that designs the UI", "An automated bot that trades on DEXs", "A risk expert that manages vault allocations and risk parameters", "A user who only provides liquidity"],
+        "correctAnswerIndex": 2
+      },
+      {
+        "id": "m4",
+        "text": "Which of these is NOT a parameter of a Morpho Blue market?",
+        "options": ["Loan Asset", "Collateral Asset", "LLTV (Liquidation Loan-to-Value)", "User's Credit Score"],
+        "correctAnswerIndex": 3
+      },
+      {
+        "id": "m5",
+        "text": "What does 'LLTV' stand for in Morpho Blue?",
+        "options": ["Long Live Total Value", "Liquidation Loan-To-Value", "Layered Lending Total Volume", "Leveraged Loan Trading Velocity"],
+        "correctAnswerIndex": 1
+      }
+    ]
+  },
+  {
+    "id": "aave",
+    "title": "AAVE Protocol",
+    "description": "Explore the liquidity market titan, from Flash Loans to V3 Efficiency Mode.",
+    "secretWord": "GHO_GHOST_VAULT",
+    "questions": [
+      {
+        "id": "a1",
+        "text": "What is the primary characteristic of an Aave Flash Loan?",
+        "options": ["It must be repaid within 24 hours", "It requires 200% collateral", "It must be borrowed and repaid within the same blockchain transaction", "It is only available to institutional investors"],
+        "correctAnswerIndex": 2
+      },
+      {
+        "id": "a2",
+        "text": "What is 'E-Mode' in Aave V3?",
+        "options": ["Emergency Mode for protocol pauses", "Efficiency Mode for high LTV between correlated assets", "Easy Mode for new users", "Ethereum-only Mode"],
+        "correctAnswerIndex": 1
+      },
+      {
+        "id": "a3",
+        "text": "Which token is the native decentralized stablecoin of the Aave ecosystem?",
+        "options": ["USDT", "DAI", "GHO", "PYUSD"],
+        "correctAnswerIndex": 2
+      },
+      {
+        "id": "a4",
+        "text": "What are 'aTokens'?",
+        "options": ["Governance tokens used for voting only", "Interest-bearing tokens that increase in value/amount as interest accrues", "Voucher tokens for Aave merchandise", "Tokens used to pay gas fees on Aave"],
+        "correctAnswerIndex": 1
+      },
+      {
+        "id": "a5",
+        "text": "What is the 'Safety Module' in Aave used for?",
+        "options": ["Staking AAVE to act as a backstop in case of a shortfall event", "Storing private keys for users", "Automated trading", "Protecting the UI from hackers"],
+        "correctAnswerIndex": 0
+      }
+    ]
+  },
+  {
+    "id": "sablier",
+    "title": "Sablier",
+    "description": "Understand continuous streaming of tokens and real-time payroll mechanics.",
+    "secretWord": "FLOW_STATE_SABLIER",
+    "questions": [
+      {
+        "id": "s1",
+        "text": "How does Sablier distribute tokens over time?",
+        "options": ["In lump sums every month", "Continuously, second-by-second", "Only when the sender triggers a release", "Based on the recipient's performance"],
+        "correctAnswerIndex": 1
+      },
+      {
+        "id": "s2",
+        "text": "In Sablier V2, what technology is used to represent a stream?",
+        "options": ["An ERC-20 token", "An ERC-721 NFT", "A Merkle Tree", "A central database"],
+        "correctAnswerIndex": 1
+      },
+      {
+        "id": "s3",
+        "text": "What happens when a sender 'cancels' a cancelable stream?",
+        "options": ["All tokens are burned", "Remaining unstreamed tokens are returned to the sender", "All tokens are sent to the recipient immediately", "The stream is paused but tokens stay in the contract"],
+        "correctAnswerIndex": 1
+      },
+      {
+        "id": "s4",
+        "text": "What is a 'Linear Stream' in Sablier?",
+        "options": ["A stream that releases tokens based on a curve", "A stream that releases tokens at a constant rate over time", "A stream with a random release schedule", "A stream that never ends"],
+        "correctAnswerIndex": 1
+      },
+      {
+        "id": "s5",
+        "text": "Which of these can be a 'Recipient' of a Sablier stream?",
+        "options": ["Only a hardware wallet", "Any valid Ethereum address or smart contract", "Only addresses that have passed KYC", "Only multisig wallets"],
+        "correctAnswerIndex": 1
+      }
+    ]
+  }
+]
