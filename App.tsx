@@ -1,8 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { QuizCategory, QuizStatus } from './types';
 import QuizCard from './components/QuizCard';
 import ProgressBar from './components/ProgressBar';
+
+const QUESTION_TIMEOUT = 25; // seconds
 
 const App: React.FC = () => {
   const [quizData, setQuizData] = useState<QuizCategory[]>([]);
@@ -12,9 +14,12 @@ const App: React.FC = () => {
   const [userAnswers, setUserAnswers] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // New state for confirmation logic
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  
+  // Anti-cheat states
+  const [timeLeft, setTimeLeft] = useState(QUESTION_TIMEOUT);
+  const [cheatingDetected, setCheatingDetected] = useState(false);
 
   useEffect(() => {
     fetch('./data/quizzes.json')
@@ -29,6 +34,34 @@ const App: React.FC = () => {
       });
   }, []);
 
+  // Detection: Tab Switching
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && status === 'in-progress') {
+        setCheatingDetected(true);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [status]);
+
+  // Question Timer
+  useEffect(() => {
+    let timer: number;
+    if (status === 'in-progress' && !isConfirmed && !cheatingDetected) {
+      timer = window.setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            handleConfirmAnswer(); // Auto-confirm if time runs out
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [status, isConfirmed, cheatingDetected, currentQuestionIndex]);
+
   const currentCategory = quizData.find(c => c.id === currentCategoryId);
   const currentQuestion = currentCategory?.questions[currentQuestionIndex];
 
@@ -39,25 +72,26 @@ const App: React.FC = () => {
     setUserAnswers([]);
     setSelectedOption(null);
     setIsConfirmed(false);
+    setTimeLeft(QUESTION_TIMEOUT);
+    setCheatingDetected(false);
   };
 
   const handleSelectOption = (idx: number) => {
-    if (isConfirmed) return;
+    if (isConfirmed || cheatingDetected) return;
     setSelectedOption(idx);
   };
 
-  const handleConfirmAnswer = () => {
-    if (selectedOption === null) return;
+  const handleConfirmAnswer = useCallback(() => {
+    if (isConfirmed) return;
     setIsConfirmed(true);
-  };
+  }, [isConfirmed]);
 
   const handleNextQuestion = () => {
-    if (selectedOption === null) return;
-    
-    const nextAnswers = [...userAnswers, selectedOption];
+    const nextAnswers = [...userAnswers, selectedOption ?? -1]; // -1 for timeout
     setUserAnswers(nextAnswers);
     setSelectedOption(null);
     setIsConfirmed(false);
+    setTimeLeft(QUESTION_TIMEOUT);
 
     if (currentCategory && currentQuestionIndex < currentCategory.questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
@@ -80,6 +114,7 @@ const App: React.FC = () => {
     setUserAnswers([]);
     setSelectedOption(null);
     setIsConfirmed(false);
+    setCheatingDetected(false);
   };
 
   if (loading) {
@@ -94,7 +129,9 @@ const App: React.FC = () => {
   const isPassed = score >= 3;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-12 md:py-16">
+    <div className={`max-w-5xl mx-auto px-4 py-12 md:py-16 ${status === 'in-progress' ? 'select-none' : ''}`} 
+         onContextMenu={(e) => status === 'in-progress' && e.preventDefault()}>
+      
       <header className="mb-16 text-center">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full text-xs font-bold uppercase tracking-widest mb-6 shadow-sm">
           <span className="relative flex h-2 w-2">
@@ -109,12 +146,26 @@ const App: React.FC = () => {
           </span>
         </h1>
         <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
-          Select a subject to test your technical knowledge. 
-          Successfully complete 3/5 questions to unlock exclusive protocol secrets.
+          The environment is secured. Timer active. No tab switching allowed.
         </p>
       </header>
 
       <main className="relative min-h-[500px]">
+        {cheatingDetected && status === 'in-progress' && (
+          <div className="max-w-2xl mx-auto bg-rose-950/40 backdrop-blur-xl border border-rose-500/50 rounded-[2.5rem] p-12 text-center shadow-2xl animate-in fade-in zoom-in duration-300">
+            <h2 className="text-3xl font-black text-rose-400 mb-4">Security Violation</h2>
+            <p className="text-rose-200/70 mb-8 leading-relaxed">
+              Assessment integrity compromised. Tab switching or window blur detected. AI assistance is strictly prohibited.
+            </p>
+            <button 
+              onClick={reset}
+              className="bg-rose-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-rose-400 transition-all shadow-lg shadow-rose-500/20"
+            >
+              Restart & Re-verify
+            </button>
+          </div>
+        )}
+
         {status === 'idle' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
             {quizData.map(category => (
@@ -127,22 +178,16 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {status === 'in-progress' && currentCategory && currentQuestion && (
+        {status === 'in-progress' && !cheatingDetected && currentCategory && currentQuestion && (
           <div className="max-w-2xl mx-auto bg-gray-900/50 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden">
-            <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/20 blur-[80px] rounded-full" />
+            <div className={`absolute top-0 right-0 h-1 bg-blue-500 transition-all duration-1000`} style={{ width: `${(timeLeft / QUESTION_TIMEOUT) * 100}%` }} />
             
             <div className="flex justify-between items-center mb-10 relative z-10">
               <div className="flex flex-col">
-                <span className="text-blue-400 font-mono text-xs font-bold tracking-tighter mb-1">SECTION: {currentCategory.title.toUpperCase()}</span>
-                <span className="text-gray-500 text-xs font-medium uppercase tracking-widest">Question {currentQuestionIndex + 1} of 5</span>
+                <span className="text-blue-400 font-mono text-xs font-bold tracking-tighter mb-1 uppercase tracking-widest">{currentCategory.title}</span>
+                <span className="text-gray-500 text-xs font-medium uppercase tracking-widest">Q{currentQuestionIndex + 1} • {timeLeft}s remaining</span>
               </div>
-              <button 
-                onClick={reset}
-                className="group flex items-center gap-2 text-gray-400 hover:text-white text-xs font-bold uppercase tracking-widest transition-all"
-              >
-                <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Abort
-              </button>
+              <button onClick={reset} className="text-gray-500 hover:text-rose-400 text-[10px] font-black uppercase tracking-widest transition-colors">Abort Test</button>
             </div>
 
             <div className="mb-10">
@@ -150,7 +195,7 @@ const App: React.FC = () => {
             </div>
 
             <div className="mb-12 relative z-10">
-              <h2 className="text-2xl md:text-3xl font-bold text-white leading-tight mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold text-white leading-tight mb-8 pointer-events-none">
                 {currentQuestion.text}
               </h2>
               
@@ -162,19 +207,12 @@ const App: React.FC = () => {
                   let buttonClass = "w-full text-left p-6 rounded-2xl border transition-all group relative overflow-hidden flex items-center gap-4 ";
                   
                   if (isConfirmed) {
-                    if (isCorrect) {
-                      buttonClass += "bg-emerald-500/20 border-emerald-500/50 text-emerald-100 shadow-[0_0_15px_rgba(16,185,129,0.1)]";
-                    } else if (isUserSelected) {
-                      buttonClass += "bg-rose-500/20 border-rose-500/50 text-rose-100";
-                    } else {
-                      buttonClass += "bg-white/[0.02] border-white/5 opacity-50";
-                    }
+                    if (isCorrect) buttonClass += "bg-emerald-500/20 border-emerald-500/50 text-emerald-100";
+                    else if (isUserSelected) buttonClass += "bg-rose-500/20 border-rose-500/50 text-rose-100";
+                    else buttonClass += "bg-white/[0.02] border-white/5 opacity-50";
                   } else {
-                    if (isUserSelected) {
-                      buttonClass += "bg-blue-500/20 border-blue-500 text-blue-100";
-                    } else {
-                      buttonClass += "bg-white/[0.03] border-white/5 text-gray-300 hover:bg-white/[0.08] hover:border-gray-500";
-                    }
+                    if (isUserSelected) buttonClass += "bg-blue-500/20 border-blue-500 text-blue-100";
+                    else buttonClass += "bg-white/[0.03] border-white/5 text-gray-300 hover:bg-white/[0.08] hover:border-gray-500";
                   }
 
                   return (
@@ -191,15 +229,9 @@ const App: React.FC = () => {
                       }`}>
                         {String.fromCharCode(65 + idx)}
                       </div>
-                      <span className="flex-1 text-sm md:text-base font-medium">
+                      <span className="flex-1 text-sm md:text-base font-medium pointer-events-none">
                         {option}
                       </span>
-                      {isConfirmed && isCorrect && (
-                        <svg className="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
-                      )}
-                      {isConfirmed && isUserSelected && !isCorrect && (
-                        <svg className="w-5 h-5 text-rose-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
-                      )}
                     </button>
                   );
                 })}
@@ -209,12 +241,12 @@ const App: React.FC = () => {
             <div className="mt-8 relative z-10 flex justify-end">
               {!isConfirmed ? (
                 <button
-                  disabled={selectedOption === null}
+                  disabled={selectedOption === null && timeLeft > 0}
                   onClick={handleConfirmAnswer}
                   className={`px-8 py-3 rounded-xl font-bold transition-all transform active:scale-95 ${
                     selectedOption !== null 
-                      ? 'bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-500/20' 
-                      : 'bg-gray-800 text-gray-500 cursor-not-allowed border border-white/5'
+                      ? 'bg-blue-600 text-white hover:bg-blue-500' 
+                      : 'bg-gray-800 text-gray-500 cursor-not-allowed'
                   }`}
                 >
                   Confirm Selection
@@ -303,8 +335,8 @@ const App: React.FC = () => {
           </div>
           <div className="w-px h-8 bg-white/10 self-center"></div>
           <div className="flex flex-col items-center">
-            <span className="text-white font-bold text-xl">100%</span>
-            <span className="text-gray-500 text-[10px] uppercase font-bold tracking-widest">On-Chain Data</span>
+            <span className="text-white font-bold text-xl">Secured</span>
+            <span className="text-gray-500 text-[10px] uppercase font-bold tracking-widest">Anti-AI</span>
           </div>
         </div>
         <p className="text-gray-600 text-sm font-medium">
