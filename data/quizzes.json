@@ -5,6 +5,12 @@
     "title": "Morpho Protocol",
     "description": "Master the efficiency of peer-to-peer matching and the trustless nature of Morpho Blue.",
     "secretWord": "EFFICIENT_LIQUIDITY_88",
+    "briefing": [
+      "Morpho is a decentralized lending protocol that improves the efficiency of existing lending pools like Aave and Compound. It works by matching lenders and borrowers peer-to-peer (P2P) whenever possible. This matching allows both parties to enjoy 'P2P rates,' which are better than the standard pool rates, as they bypass the spread kept by the liquidity pool.",
+      "The latest iteration, Morpho Blue, is a highly efficient and trustless lending primitive. Unlike traditional protocols that use a single monolithic pool with shared risk, Morpho Blue allows for the creation of isolated markets. Each market is defined by a loan asset, a collateral asset, an Oracle, and an LLTV (Liquidation Loan-to-Value) ratio.",
+      "Because Morpho Blue is a base-layer primitive, it doesn't have built-in risk management at the protocol level. Instead, it relies on MetaMorpho, a layer of lending vaults that sit on top of Morpho Blue. Curators manage these vaults, deciding which markets to allocate capital to and setting specific risk parameters for their users.",
+      "Liquidation in Morpho is purely functional. If a borrower's position exceeds the LLTV, any user can liquidate the position to maintain protocol solvency. The LLTV is the maximum ratio of debt to collateral allowed before liquidation is triggered, ensuring the system remains over-collateralized at all times."
+    ],
     "questions": [
       {
         "id": "m1",
@@ -43,6 +49,13 @@
     "title": "AAVE Protocol",
     "description": "Explore the liquidity market titan, from Flash Loans to V3 Efficiency Mode.",
     "secretWord": "GHO_GHOST_VAULT",
+    "briefing": [
+      "Aave is one of the largest decentralized non-custodial liquidity markets. Users can participate as suppliers or borrowers. Suppliers provide liquidity to the market to earn a passive income, while borrowers are able to borrow in an over-collateralized (perpetual) or under-collateralized (one-block) fashion via Flash Loans.",
+      "Aave V3 introduced Efficiency Mode (E-Mode), which allows borrowers to maximize their borrowing power when collateral and borrowed assets are price-correlated (e.g., stablecoins or LSTs like stETH/ETH). In E-Mode, the LTV can be significantly higher than in the standard market.",
+      "The protocol is governed by AAVE token holders through the Aave DAO. A key component of its security is the Safety Module, a transition fund where users stake AAVE tokens. In the event of a shortfall (bad debt), these tokens can be auctioned to cover the deficit, protecting the depositors.",
+      "GHO is Aave's native decentralized, over-collateralized stablecoin. It is minted by users against their collateral in the Aave protocol. Unlike centralized stablecoins, GHO is governed by the community, and all interest payments go directly to the Aave DAO treasury.",
+      "Flash Loans are a signature feature of Aave. They allow users to borrow any amount of assets without collateral, provided that the liquidity is returned to the protocol within one single block transaction. If the funds aren't returned, the transaction fails, ensuring the protocol's safety."
+    ],
     "questions": [
       {
         "id": "a1",
@@ -81,6 +94,13 @@
     "title": "Sablier",
     "description": "Understand continuous streaming of tokens and real-time payroll mechanics.",
     "secretWord": "FLOW_STATE_SABLIER",
+    "briefing": [
+      "Sablier is a protocol for real-time finance. It enables the continuous streaming of tokens from a sender to a recipient. Instead of monthly or bi-weekly payouts, Sablier allows users to be paid second-by-second, which is particularly useful for payroll, vesting, and subscriptions.",
+      "In Sablier V2, every stream is represented as an ERC-721 NFT. This means the right to receive the stream is transferable. If a recipient wants to sell their future stream of tokens, they can list the NFT on a secondary market like OpenSea, effectively liquidating their future earnings.",
+      "There are different types of streams in Sablier. Linear streams release tokens at a constant rate over the duration of the stream. Non-linear streams can use exponential curves or custom cliff-based distributions to better match complex vesting schedules or tokenomics.",
+      "The protocol is non-custodial. When a stream is created, the tokens are locked in the Sablier smart contract. The recipient can withdraw their 'accrued' tokens at any time without needing permission from the sender, provided the stream hasn't been cancelled (if cancelable).",
+      "Sablier helps eliminate 'trust issues' in payments. Once a stream is funded and started, the recipient knows the funds are locked and being released. It's a key tool for DAOs to manage contributor rewards and for startups to handle employee token vesting automatically."
+    ],
     "questions": [
       {
         "id": "s1",

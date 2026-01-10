@@ -12,9 +12,10 @@ export interface QuizCategory {
   description: string;
   questions: Question[];
   secretWord: string;
+  briefing: string[]; // New field for protocol documentation
 }
 
-export type QuizStatus = 'idle' | 'in-progress' | 'completed';
+export type QuizStatus = 'idle' | 'briefing' | 'in-progress' | 'completed';
 
 export interface QuizState {
   currentCategoryId: string | null;

@@ -34,7 +34,7 @@ const App: React.FC = () => {
       });
   }, []);
 
-  // Detection: Tab Switching
+  // Detection: Tab Switching (only during in-progress)
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden && status === 'in-progress') {
@@ -52,7 +52,7 @@ const App: React.FC = () => {
       timer = window.setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            handleConfirmAnswer(); // Auto-confirm if time runs out
+            handleConfirmAnswer();
             return 0;
           }
           return prev - 1;
@@ -65,8 +65,12 @@ const App: React.FC = () => {
   const currentCategory = quizData.find(c => c.id === currentCategoryId);
   const currentQuestion = currentCategory?.questions[currentQuestionIndex];
 
-  const handleStartQuiz = (id: string) => {
+  const handleSelectCategory = (id: string) => {
     setCurrentCategoryId(id);
+    setStatus('briefing');
+  };
+
+  const handleStartQuiz = () => {
     setStatus('in-progress');
     setCurrentQuestionIndex(0);
     setUserAnswers([]);
@@ -87,7 +91,7 @@ const App: React.FC = () => {
   }, [isConfirmed]);
 
   const handleNextQuestion = () => {
-    const nextAnswers = [...userAnswers, selectedOption ?? -1]; // -1 for timeout
+    const nextAnswers = [...userAnswers, selectedOption ?? -1];
     setUserAnswers(nextAnswers);
     setSelectedOption(null);
     setIsConfirmed(false);
@@ -142,11 +146,13 @@ const App: React.FC = () => {
         </div>
         <h1 className="text-5xl md:text-6xl font-extrabold mb-6 tracking-tight">
           <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-500">
-            Protocol Assessment
+            {status === 'briefing' ? 'Protocol Briefing' : 'Protocol Assessment'}
           </span>
         </h1>
         <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
-          The environment is secured. Timer active. No tab switching allowed.
+          {status === 'briefing' 
+            ? `Review the technical documentation for ${currentCategory?.title} before starting.` 
+            : 'The environment is secured. Timer active. No tab switching allowed.'}
         </p>
       </header>
 
@@ -172,9 +178,36 @@ const App: React.FC = () => {
               <QuizCard 
                 key={category.id} 
                 category={category} 
-                onStart={handleStartQuiz} 
+                onStart={handleSelectCategory} 
               />
             ))}
+          </div>
+        )}
+
+        {status === 'briefing' && currentCategory && (
+          <div className="max-w-3xl mx-auto bg-gray-900/50 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 md:p-12 shadow-2xl animate-in fade-in zoom-in duration-500">
+             <div className="flex justify-between items-center mb-10">
+                <h2 className="text-3xl font-bold text-white">{currentCategory.title} Docs</h2>
+                <button onClick={reset} className="text-gray-500 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest">Back to Hub</button>
+             </div>
+             
+             <div className="space-y-6 max-h-[450px] overflow-y-auto pr-4 custom-scrollbar mb-10">
+               {currentCategory.briefing.map((para, i) => (
+                 <p key={i} className="text-gray-300 leading-relaxed text-lg font-light">
+                   {para}
+                 </p>
+               ))}
+             </div>
+
+             <div className="flex justify-end pt-6 border-t border-white/5">
+                <button 
+                  onClick={handleStartQuiz}
+                  className="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black hover:bg-blue-500 transition-all transform active:scale-95 shadow-xl shadow-blue-500/20 flex items-center gap-3"
+                >
+                  START ASSESSMENT
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                </button>
+             </div>
           </div>
         )}
 
@@ -245,8 +278,8 @@ const App: React.FC = () => {
                   onClick={handleConfirmAnswer}
                   className={`px-8 py-3 rounded-xl font-bold transition-all transform active:scale-95 ${
                     selectedOption !== null 
-                      ? 'bg-blue-600 text-white hover:bg-blue-500' 
-                      : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                      ? 'bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-500/20' 
+                      : 'bg-gray-800 text-gray-500 cursor-not-allowed border border-white/5'
                   }`}
                 >
                   Confirm Selection
@@ -304,10 +337,10 @@ const App: React.FC = () => {
             ) : (
               <div className="flex flex-col gap-4 mb-12">
                 <button 
-                  onClick={() => handleStartQuiz(currentCategory.id)}
+                  onClick={() => handleSelectCategory(currentCategory.id)}
                   className="w-full bg-white text-black py-4 rounded-2xl font-bold hover:bg-gray-200 transition-all transform active:scale-95"
                 >
-                  Restart Assessment
+                  Return to Briefing
                 </button>
               </div>
             )}
